@@ -3,23 +3,16 @@ import './App.css';
 import SearchBar from '../SearchBar/SearchBar';
 import SearchResults from '../SearchResults/SearchResults';
 import Playlist from '../Playlist/Playlist';
-import TrackList from '../TrackList/TrackList';
+import Spotify from '../../util/Spotify';
+
 
 class App extends React.Component {
   constructor(props){
     super(props);
     this.state =  {
-      searchResults: [
-        {name: 'Be With You', artist: 'Beyonce', album: 'Crazy in Love', id: 1},
-        {name: 'Can U Handle It', artist: 'Usher', album: 'Confessions', id: 2},
-        {name: 'U Belong To Me', artist: 'Try Songz', album: 'Anticipation II', id: 3}
-      ],
-      playlistName: "My Playlists",
-      playlistTracks:[
-        {name: 'Change', artist: 'Brooke Valentine', album: 'Change', id: 5},
-        {name: 'Forever Yours', artist: 'Trey Songz', album: 'Chapter 5', id: 10},
-        {name:'Worth It', artist: 'The Weeknd', album: '50 Shades', id: 7}
-      ]
+      searchResults: [],
+      playlistName: "New Playlist",
+      playlistTracks:[]
     }
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -32,8 +25,8 @@ class App extends React.Component {
     let tracks = this.state.playlistTracks;
     if (!tracks.find(song => song.id === track.id)){
       tracks.push(track)
+      this.setState({playlistTracks: tracks})
     }
-    this.setState({playlistTracks: tracks})
   }
 
   removeTrack(track){
@@ -45,12 +38,19 @@ class App extends React.Component {
     this.setState({playlistName: name})
   }
 
-  savePlaylist(){
-    const trackURIs = this.state.playlistTracks.map(track => track.uri);
+   savePlaylist() {
+    const trackUris = this.state.playlistTracks.map(track => track.uri);
+    Spotify.savePlaylist(this.state.playlistName, trackUris);
+      this.setState({
+        playlistName: 'New Playlist',
+        playlistTracks: []
+      });
   }
 
    search(term){
-    console.log(term);
+    Spotify.search(term).then(searchResults => {
+      this.setState({searchResults: searchResults})
+    })
   }
 
   render(){
